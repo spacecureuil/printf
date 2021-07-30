@@ -15,58 +15,35 @@
 
 #include <stdio.h>
 
-void	ft_putchar(char c, t_printf_env *printf_env)
-{
-	write(1, &c, 1);
-	printf_env->total_length += 1;
-}
-
-void	ft_putstr(char *str, t_printf_env *printf_env)
+int		ft_strlen(char *s)
 {
 	int	i;
 
 	i = 0;
-	while (str[i])
-	{
-		ft_putchar(str[i], printf_env);
+	while (s[i])
 		i++;
-	}
+	return (i);
 }
 
 int		is_type(const char c)
 {
-	if (c == 'c' || c == 's' || c == 'p' || c == 'd' || c == 'i' 
-	|| c == 'u' || c == 'x' || c == 'X' || c == '%')
-		return (1);
-	else
-		return (0);
-}
+	int	i;
+	const char	*id = "csdiupxX%";
 
-void	ft_conv(const char c, t_printf_env *printf_env)
-{
-	if (c == 'c')
-		ft_putchar(va_arg(printf_env->args, int), printf_env);
-	else if (c == 's')
-		ft_putstr(va_arg(printf_env->args, char *), printf_env);
-	else if (c == 'p')
-		printf("Ceci est un pointeur\n");
-	else if (c == 'd')
-		printf("Ceci est un chiffre\n");
-	else if (c == 'i')
-		printf("Ceci est un entier\n");
-	else if (c == 'u')
-		printf("Ceci est un entier non signe\n");
-	else if (c == 'x')
-		printf("Ceci est un hexadecimal\n");
-	else if (c == 'X')
-		printf("Ceci est une \n");
-	else if (c == '%')
-		printf("Ceci est un pourcentage\n");
+	i = 0;
+	while (id[i])
+	{
+		if (c == id[i])
+			return (i);
+		i++;
+	}
+	return (-1);
 }
 
 void	ft_parse(const char *format, t_printf_env *printf_env)
 {
 	int	i;
+	int	id;
 
 	i = 0;
 	while (format[i])
@@ -74,30 +51,63 @@ void	ft_parse(const char *format, t_printf_env *printf_env)
 		if (format[i] == '%')
 		{
 			i++;
-			if (is_type(format[i]) == 1)
-				ft_conv(format[i], printf_env);
-			else
-				ft_putchar(format[i], printf_env);
+			id = is_type(format[i]);
+			if (id != -1)
+				printf_env->tab[id](printf_env);
 		}
 		else
-			ft_putchar(format[i], printf_env);
+			add_to_buff(printf_env, (char *)(format + i), 1);
 		i++;
 	}
+}
+
+int		identifier_c(t_printf_env *printf_env)
+{
+	char	c;
+
+	c = (char)va_arg(printf_env->args, int);
+	add_to_buff(printf_env, &c, 1);
+	return (1);
+}
+
+int		identifier_s(t_printf_env *printf_env)
+{
+	char	*s;
+	int		i;
+
+	i = 6;
+	s = va_arg(printf_env->args, char*);
+	if (s == NULL)
+		add_to_buff(printf_env, "(null)", 6);
+	else
+	{
+		i = ft_strlen(s);
+		add_to_buff(printf_env, s, i);
+	}
+	return (i);
+}
+
+void	init_tab(t_printf_env *printf_env)
+{
+	printf_env->tab[0] = identifier_c;
+	printf_env->tab[1] = identifier_s;
 }
 
 int	ft_printf(const char *format, ...)
 {
 	t_printf_env	printf_env;
 
-	printf_env = (t_printf_env){};	
+	printf_env = (t_printf_env){};
+	init_tab(&printf_env);
 	va_start(printf_env.args, format);
 	ft_parse(format, &printf_env);
 	va_end(printf_env.args);
+	ft_flush(&printf_env);
 	return (printf_env.total_length);
 }
 
 int		main(void)
 {
-	ft_printf("%s, frite");
+	ft_printf("%s\n%s\n", "bonjour", 0);
 	return (0);
 }

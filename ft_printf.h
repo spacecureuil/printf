@@ -6,7 +6,7 @@
 /*   By: pmaury <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/26 15:32:55 by pmaury            #+#    #+#             */
-/*   Updated: 2021/05/26 18:08:49 by pmaury           ###   ########.fr       */
+/*   Updated: 2021/07/30 21:09:12 by pmaury           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ typedef struct s_printf_env
 	va_list	args;
 	char	buff[BUFFER_SIZE];
 	int		buff_pos;
+	int		(*tab[9])(struct s_printf_env*);
 }			t_printf_env;
 
 int		ft_printf(const char *format, ...);
